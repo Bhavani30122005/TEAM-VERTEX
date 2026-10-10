@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShieldCheck, 
   Camera, 
@@ -12,7 +12,9 @@ import {
   Sparkles,
   ArrowRight,
   Loader2,
-  Lock
+  Lock,
+  Video,
+  UserCheck
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAuth } from '../../context/AuthContext';
@@ -21,10 +23,13 @@ import { VerificationStage, VerificationStatus } from '../../types';
 
 export const VerificationExperience: React.FC = () => {
   const { currentStudent, setActiveScreen } = useAuth();
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
-  const [motionPrompt, setMotionPrompt] = useState<string>('Align face inside scanning oval');
-  const [cameraPermissionGranted, setCameraPermissionGranted] = useState<boolean>(true);
+  const [motionPrompt, setMotionPrompt] = useState<string>('Face aligned in detection zone');
+  const [useRealWebcam, setUseRealWebcam] = useState<boolean>(false);
+  const [webcamError, setWebcamError] = useState<string>('');
   const [gpsAccuracy, setGpsAccuracy] = useState<number>(4.2);
   const [overallResult, setOverallResult] = useState<VerificationStatus>('incomplete');
   const [simulatedRiskScenario, setSimulatedRiskScenario] = useState<'normal' | 'geofence_flag' | 'liveness_fail'>('normal');
@@ -39,12 +44,43 @@ export const VerificationExperience: React.FC = () => {
     { id: 'time_duplicate', name: '6. Anti-Replay & Time Check', iconName: 'Clock', status: 'pending', explanation: 'Checking temporal nonce validity' }
   ]);
 
+  // Real Webcam Access Toggle
+  useEffect(() => {
+    let activeStream: MediaStream | null = null;
+    if (useRealWebcam) {
+      setWebcamError('');
+      navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+        .then((stream) => {
+          activeStream = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch((err) => {
+          console.warn("Camera access fallback:", err);
+          setWebcamError('Camera hardware restricted or unavailable. Running simulated neural face stream.');
+          setUseRealWebcam(false);
+        });
+    } else {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+        videoRef.current.srcObject = null;
+      }
+    }
+    return () => {
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [useRealWebcam]);
+
   // Handle Step-by-step verification pipeline execution
   const startVerificationProcess = () => {
     setIsVerifying(true);
     setOverallResult('incomplete');
     setCurrentStepIndex(0);
-    setMotionPrompt('Initializing camera feed & sensors...');
+    setMotionPrompt('Initializing facial mesh & sensors...');
 
     // Reset stages
     setStages(prev => prev.map(s => ({ ...s, status: 'pending', completionTimeMs: undefined })));
@@ -60,7 +96,7 @@ export const VerificationExperience: React.FC = () => {
     setTimeout(() => {
       updateStageStatus(1, 'passed', 'Session token VERITY-SESS-9938 verified', 140);
       setCurrentStepIndex(2);
-      setMotionPrompt('Position face inside oval & hold steady');
+      setMotionPrompt('FACE DETECTED: Analyzing 128-D vector landmarks');
     }, 1300);
 
     // Step 3: Face Match
@@ -145,69 +181,142 @@ export const VerificationExperience: React.FC = () => {
           </p>
         </div>
 
-        {/* Demo Scenario Switcher */}
-        <div className="bg-[#121A2B] border border-[#1E2D4A] p-1.5 rounded-lg flex items-center gap-2 text-xs font-mono">
-          <span className="text-slate-400 text-[11px] pl-1">Scenario:</span>
+        {/* Demo Controls Bar */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Webcam Toggle Button */}
           <button
-            onClick={() => setSimulatedRiskScenario('normal')}
-            className={`px-2 py-1 rounded text-[11px] transition-all ${
-              simulatedRiskScenario === 'normal' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30' : 'text-slate-400'
+            onClick={() => setUseRealWebcam(!useRealWebcam)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border transition-all flex items-center gap-1.5 ${
+              useRealWebcam 
+                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40' 
+                : 'bg-[#121A2B] text-slate-300 border-[#1E2D4A] hover:border-cyan-500/30'
             }`}
           >
-            Normal (Pass)
+            <Video className="w-3.5 h-3.5 text-cyan-400" />
+            {useRealWebcam ? 'Live Camera Active' : 'Enable Live Camera'}
           </button>
-          <button
-            onClick={() => setSimulatedRiskScenario('geofence_flag')}
-            className={`px-2 py-1 rounded text-[11px] transition-all ${
-              simulatedRiskScenario === 'geofence_flag' ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30' : 'text-slate-400'
-            }`}
-          >
-            Geofence Flag
-          </button>
-          <button
-            onClick={() => setSimulatedRiskScenario('liveness_fail')}
-            className={`px-2 py-1 rounded text-[11px] transition-all ${
-              simulatedRiskScenario === 'liveness_fail' ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30' : 'text-slate-400'
-            }`}
-          >
-            Spoof Fail
-          </button>
+
+          {/* Demo Scenario Switcher */}
+          <div className="bg-[#121A2B] border border-[#1E2D4A] p-1.5 rounded-lg flex items-center gap-1.5 text-xs font-mono">
+            <span className="text-slate-400 text-[11px] pl-1 hidden sm:inline">Scenario:</span>
+            <button
+              onClick={() => setSimulatedRiskScenario('normal')}
+              className={`px-2 py-1 rounded text-[11px] transition-all ${
+                simulatedRiskScenario === 'normal' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30' : 'text-slate-400'
+              }`}
+            >
+              Normal (Pass)
+            </button>
+            <button
+              onClick={() => setSimulatedRiskScenario('geofence_flag')}
+              className={`px-2 py-1 rounded text-[11px] transition-all ${
+                simulatedRiskScenario === 'geofence_flag' ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30' : 'text-slate-400'
+              }`}
+            >
+              Geofence Flag
+            </button>
+            <button
+              onClick={() => setSimulatedRiskScenario('liveness_fail')}
+              className={`px-2 py-1 rounded text-[11px] transition-all ${
+                simulatedRiskScenario === 'liveness_fail' ? 'bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30' : 'text-slate-400'
+              }`}
+            >
+              Spoof Fail
+            </button>
+          </div>
         </div>
       </div>
 
+      {webcamError && (
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs p-3 rounded-lg flex items-center gap-2 font-mono">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>{webcamError}</span>
+        </div>
+      )}
+
       {/* Main Verification Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Simulated Live Camera & Sensor Viewport */}
+        {/* Left Column: Camera Viewport with Visible Face Detection Overlay */}
         <div className="lg:col-span-5 bg-[#121A2B] border border-[#1E2D4A] rounded-2xl p-5 shadow-2xl space-y-4 flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="font-mono text-cyan-400 font-semibold flex items-center gap-1.5">
-                <Camera className="w-4 h-4 text-cyan-400" /> SENSOR & CAMERA FEED
+                <Camera className="w-4 h-4 text-cyan-400" /> BIOMETRIC DETECTION VIEWPORT
               </span>
               <span className="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" /> GPS: {gpsAccuracy}m
               </span>
             </div>
 
-            {/* Viewport Frame with Face Oval Overlay */}
-            <div className="relative w-full aspect-[4/3] bg-[#070B14] rounded-xl overflow-hidden border border-[#1E2D4A] flex items-center justify-center scanline shadow-inner">
-              {/* Simulated Camera Video Stream background */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1020] via-transparent to-[#0B1020]/60" />
+            {/* Viewport Frame with Real Face Image / Live Video Feed */}
+            <div className="relative w-full aspect-[4/3] bg-[#050810] rounded-xl overflow-hidden border border-[#1E2D4A] flex items-center justify-center scanline shadow-2xl group">
+              
+              {/* LIVE WEBCAM VIDEO or VISIBLE FACE IMAGE DISPLAY */}
+              {useRealWebcam ? (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="absolute inset-0 w-full h-full object-cover rounded-xl"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#090F1E]">
+                  {/* Student Portrait Face Image */}
+                  <img
+                    src={currentStudent.avatarUrl}
+                    alt="Detected Face Target"
+                    className={`w-44 h-56 object-cover rounded-[50%] border-2 transition-all duration-500 shadow-2xl ${
+                      isVerifying 
+                        ? 'brightness-110 border-cyan-400 cyan-glow scale-105' 
+                        : overallResult === 'verified'
+                        ? 'brightness-110 border-emerald-400 teal-glow'
+                        : overallResult === 'rejected'
+                        ? 'brightness-75 border-rose-500 grayscale'
+                        : 'brightness-95 border-cyan-500/40'
+                    }`}
+                  />
+                  {/* Semi-transparent facial grid shader */}
+                  <div className="absolute w-44 h-56 rounded-[50%] bg-gradient-to-b from-cyan-500/10 via-transparent to-teal-500/10 pointer-events-none" />
+                </div>
+              )}
 
-              {/* Facial Scanner Target Oval */}
-              <div className={`relative w-48 h-60 rounded-[50%] border-2 transition-all flex items-center justify-center ${
+              {/* Facial Mesh Scanning Target Oval Overlay */}
+              <div className={`relative w-48 h-60 rounded-[50%] border-2 transition-all duration-300 flex items-center justify-center pointer-events-none ${
                 isVerifying ? 'border-cyan-400 cyan-glow scale-105' : 
                 overallResult === 'verified' ? 'border-emerald-400 teal-glow' :
-                overallResult === 'rejected' ? 'border-rose-400' :
-                'border-slate-600'
+                overallResult === 'rejected' ? 'border-rose-500' :
+                'border-cyan-500/50'
               }`}>
-                {/* Facial Mesh Scanning Grid simulation */}
-                <div className="w-36 h-48 rounded-[50%] border border-cyan-500/20 border-dashed animate-spin" style={{ animationDuration: '12s' }} />
-                <Scan className={`w-8 h-8 absolute ${isVerifying ? 'text-cyan-400 animate-pulse' : 'text-slate-500'}`} />
+                {/* Rotating Neural Grid Ring */}
+                <div className="w-40 h-52 rounded-[50%] border border-cyan-400/40 border-dashed animate-spin" style={{ animationDuration: '10s' }} />
+
+                {/* 3D Facial Landmark Mesh Points (Eyes, Nose, Jawline) */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  {/* Eye Points */}
+                  <span className={`absolute top-20 left-14 w-2 h-2 rounded-full transition-all ${isVerifying ? 'bg-cyan-400 shadow-[0_0_8px_#22D3EE] animate-ping' : 'bg-cyan-500/60'}`} />
+                  <span className={`absolute top-20 right-14 w-2 h-2 rounded-full transition-all ${isVerifying ? 'bg-cyan-400 shadow-[0_0_8px_#22D3EE] animate-ping' : 'bg-cyan-500/60'}`} />
+                  
+                  {/* Nose Point */}
+                  <span className={`absolute top-28 w-2 h-2 rounded-full transition-all ${isVerifying ? 'bg-emerald-400 shadow-[0_0_8px_#22C55E]' : 'bg-teal-500/60'}`} />
+
+                  {/* Mouth Line Points */}
+                  <span className={`absolute bottom-20 left-16 w-1.5 h-1.5 rounded-full ${isVerifying ? 'bg-cyan-400' : 'bg-cyan-500/40'}`} />
+                  <span className={`absolute bottom-19 w-1.5 h-1.5 rounded-full ${isVerifying ? 'bg-cyan-400' : 'bg-cyan-500/40'}`} />
+                  <span className={`absolute bottom-20 right-16 w-1.5 h-1.5 rounded-full ${isVerifying ? 'bg-cyan-400' : 'bg-cyan-500/40'}`} />
+                </div>
+
+                <Scan className={`w-8 h-8 absolute ${isVerifying ? 'text-cyan-400 animate-pulse' : 'text-slate-400/60'}`} />
               </div>
 
-              {/* Top Motion Prompt Bar */}
-              <div className="absolute bottom-3 left-3 right-3 bg-[#0B1020]/90 backdrop-blur-md border border-[#1E2D4A] p-2.5 rounded-lg text-center text-xs font-mono text-cyan-300 shadow-lg">
+              {/* Status Badge in Viewport Corner */}
+              <div className="absolute top-3 left-3 bg-[#0B1020]/90 backdrop-blur-md px-2.5 py-1 rounded border border-[#1E2D4A] text-[10px] font-mono text-cyan-300 font-bold flex items-center gap-1.5">
+                <UserCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <span>FACE DETECTED: {currentStudent.name}</span>
+              </div>
+
+              {/* Bottom Motion Prompt Instruction Bar */}
+              <div className="absolute bottom-3 left-3 right-3 bg-[#0B1020]/95 backdrop-blur-md border border-[#1E2D4A] p-2.5 rounded-lg text-center text-xs font-mono text-cyan-300 shadow-xl">
                 {isVerifying ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin text-cyan-400" /> {motionPrompt}
@@ -232,7 +341,7 @@ export const VerificationExperience: React.FC = () => {
             >
               {isVerifying ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Verifying Layer {currentStepIndex + 1}...
+                  <Loader2 className="w-4 h-4 animate-spin" /> Executing Layer {currentStepIndex + 1}...
                 </>
               ) : (
                 <>
