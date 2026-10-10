@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --navy-bg: #0B1020;
+  --navy-card: #121A2B;
+  --navy-card-hover: #19243C;
+  --navy-border: #1E2D4A;
+  --navy-border-bright: #2A3F66;
+  --teal-accent: #14B8A6;
+  --cyan-electric: #22D3EE;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --error: #F87171;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0B1020;
+  color: #F8FAFC;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glassmorphism & Cyber utilities */
+.glass-panel {
+  background: rgba(18, 26, 43, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(34, 211, 238, 0.12);
+}
+
+.glass-panel-hover {
+  transition: all 0.25s ease-in-out;
+}
+
+.glass-panel-hover:hover {
+  background: rgba(25, 36, 60, 0.85);
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(11, 16, 32, 0.5), 0 0 15px 0 rgba(34, 211, 238, 0.08);
+}
+
+.cyan-glow {
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.25);
+}
+
+.teal-glow {
+  box-shadow: 0 0 20px rgba(20, 184, 166, 0.25);
+}
+
+/* Scanline effect for camera/radar */
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.8), transparent);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.8);
+  animation: scan 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  0% { top: 0%; opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { top: 96%; opacity: 0.2; }
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.3; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.radar-pulse {
+  animation: radar-pulse 3s infinite ease-in-out;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B1020;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E2D4A;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #14B8A6;
+}
