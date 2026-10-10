@@ -96,3 +96,4 @@ TEAM VERTEX/
 
 ## 📄 License & Hackathon Compliance
 Built for PS-05 Computer Vision / Security Hackathon 2026 by Team Vertex.
+# TEAM-VERTEX
