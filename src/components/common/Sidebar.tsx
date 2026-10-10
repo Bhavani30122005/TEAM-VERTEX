@@ -68,16 +68,16 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`bg-[#0B1020] border-r border-[#1E2D4A] transition-all duration-300 flex flex-col justify-between ${
+      className={`bg-white border-r border-slate-200 transition-all duration-300 flex flex-col justify-between ${
         collapsed ? 'w-16' : 'w-64'
-      } shrink-0 hidden md:flex min-h-[calc(100vh-4rem)] sticky top-16`}
+      } shrink-0 hidden md:flex min-h-[calc(100vh-4rem)] sticky top-16 shadow-sm`}
     >
       <div className="p-3 space-y-4">
         {/* Toggle Collapse Button */}
-        <div className="flex items-center justify-end border-b border-[#1E2D4A]/50 pb-2">
+        <div className="flex items-center justify-end border-b border-slate-200/80 pb-2">
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1.5 rounded-lg bg-[#121A2B] text-slate-400 hover:text-white border border-[#1E2D4A] transition-colors"
+            className="p-1.5 rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 border border-slate-200 transition-colors"
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
@@ -95,12 +95,12 @@ export const Sidebar: React.FC = () => {
                 onClick={() => setActiveScreen(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-gradient-to-r from-cyan-500/15 to-teal-500/15 text-cyan-300 border border-cyan-500/30 font-semibold shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-[#121A2B]'
+                    ? 'bg-blue-50 text-blue-700 border border-blue-200 font-semibold shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
                 title={collapsed ? item.label : undefined}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-400'}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
                 {!collapsed && <span className="truncate">{item.label}</span>}
               </button>
             );
@@ -108,14 +108,14 @@ export const Sidebar: React.FC = () => {
         </nav>
       </div>
 
-      {/* Footer / System Status Pill */}
+      {/* System Status Pill */}
       {!collapsed && (
-        <div className="p-3 m-3 bg-[#121A2B] border border-[#1E2D4A] rounded-lg text-[11px] text-slate-400">
-          <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-cyan-400 font-bold">VERITY CORE v2.4</span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="p-3 m-3 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full bg-green-600 animate-pulse" />
+            <span className="font-semibold text-slate-900 text-[11px]">System Status: Operational</span>
           </div>
-          <p className="text-[10px] text-slate-500">Node: VERTEX-ASIA-SOUTH1</p>
+          <p className="text-[10px] text-slate-500">FastAPI microservice active on port 8000</p>
         </div>
       )}
     </aside>

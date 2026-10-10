@@ -39,6 +39,7 @@ export interface Student {
   enrolledFaceTemplate: boolean;
   trustScore: number; // 0 - 100
   registeredDevice: string;
+  password?: string;
 }
 
 export interface Faculty {
@@ -49,6 +50,7 @@ export interface Faculty {
   department: string;
   designation: string;
   assignedSubjects: string[];
+  password?: string;
 }
 
 export interface Subject {

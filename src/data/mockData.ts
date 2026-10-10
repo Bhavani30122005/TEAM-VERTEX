@@ -37,7 +37,8 @@ export const mockStudents: Student[] = [
     overallAttendancePct: 94.2,
     enrolledFaceTemplate: true,
     trustScore: 98,
-    registeredDevice: 'iPhone 15 Pro (iOS 18.1)'
+    registeredDevice: 'iPhone 15 Pro (iOS 18.1)',
+    password: 'Student@Vertex2026'
   },
   {
     id: 'std_2',
@@ -50,7 +51,8 @@ export const mockStudents: Student[] = [
     overallAttendancePct: 88.5,
     enrolledFaceTemplate: true,
     trustScore: 95,
-    registeredDevice: 'Samsung Galaxy S24 (Android 15)'
+    registeredDevice: 'Samsung Galaxy S24 (Android 15)',
+    password: 'Student@Vertex2026'
   },
   {
     id: 'std_3',
@@ -60,10 +62,11 @@ export const mockStudents: Student[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
     department: 'Cybersecurity Engineering',
     semester: 6,
-    overallAttendancePct: 71.0, // Low attendance warning!
+    overallAttendancePct: 71.0,
     enrolledFaceTemplate: true,
     trustScore: 82,
-    registeredDevice: 'Google Pixel 9 (Android 15)'
+    registeredDevice: 'Google Pixel 9 (Android 15)',
+    password: 'Student@Vertex2026'
   },
   {
     id: 'std_4',
@@ -76,7 +79,8 @@ export const mockStudents: Student[] = [
     overallAttendancePct: 96.8,
     enrolledFaceTemplate: true,
     trustScore: 99,
-    registeredDevice: 'OnePlus 12 (Android 14)'
+    registeredDevice: 'OnePlus 12 (Android 14)',
+    password: 'Student@Vertex2026'
   }
 ];
 
@@ -87,8 +91,42 @@ export const mockFaculty: Faculty = {
   email: 'rajesh.kumar@vertex.edu',
   department: 'Computer Science & Engineering',
   designation: 'Professor & Head of Security Analytics',
-  assignedSubjects: ['CS401', 'CS408']
+  assignedSubjects: ['CS401', 'CS408'],
+  password: 'Faculty@Vertex2026'
 };
+
+export const mockFacultyList: Faculty[] = [
+  {
+    id: 'fac_101',
+    employeeId: 'EMP-FAC-992',
+    name: 'Dr. Rajesh Kumar',
+    email: 'rajesh.kumar@vertex.edu',
+    department: 'Computer Science & Engineering',
+    designation: 'Professor & Head of Security Analytics',
+    assignedSubjects: ['CS401', 'CS408'],
+    password: 'Faculty@Vertex2026'
+  },
+  {
+    id: 'fac_102',
+    employeeId: 'EMP-FAC-881',
+    name: 'Prof. Ananya Sen',
+    email: 'ananya.sen@vertex.edu',
+    department: 'Cybersecurity Engineering',
+    designation: 'Associate Professor',
+    assignedSubjects: ['CS412'],
+    password: 'Faculty@Vertex2026'
+  },
+  {
+    id: 'fac_103',
+    employeeId: 'EMP-FAC-774',
+    name: 'Dr. Vikram Reddy',
+    email: 'vikram.reddy@vertex.edu',
+    department: 'Artificial Intelligence',
+    designation: 'Assistant Professor',
+    assignedSubjects: ['CS405'],
+    password: 'Faculty@Vertex2026'
+  }
+];
 
 export const mockSubjects: Subject[] = [
   {

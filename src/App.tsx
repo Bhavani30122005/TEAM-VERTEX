@@ -46,7 +46,7 @@ const MainAppContent: React.FC = () => {
   const isFullBleedPage = activeScreen === 'landing' || activeScreen === 'auth' || (role === 'student' && activeScreen === 'student-dashboard');
 
   return (
-    <div className="min-h-screen bg-[#0B1020] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       <Navbar />
 
       <div className="flex-1 flex w-full">

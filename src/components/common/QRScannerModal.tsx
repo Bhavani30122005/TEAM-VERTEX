@@ -34,52 +34,52 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#121A2B] border border-[#1E2D4A] rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl relative">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <QrCode className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-lg font-bold text-white">Scan Session QR Code</h3>
+            <QrCode className="w-5 h-5 text-blue-600" />
+            <h3 className="text-lg font-bold text-slate-900">Scan Session QR Code</h3>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Scan active QR code displayed on Faculty Screen to bind attendance
           </p>
         </div>
 
         {errorMsg && (
-          <div className="bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs p-3 rounded-lg flex items-center gap-2 font-mono">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+          <div className="bg-red-100 border border-red-300 text-red-900 text-xs p-3 rounded-lg flex items-center gap-2 font-mono font-medium">
+            <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Viewport QR Frame Simulator */}
-        <div className="relative w-full aspect-square max-w-[220px] mx-auto bg-[#070B14] rounded-xl border border-cyan-500/40 p-4 flex flex-col items-center justify-center scanline shadow-2xl">
-          <Scan className={`w-12 h-12 text-cyan-400 ${isScanning ? 'animate-ping' : 'animate-pulse'}`} />
-          <span className="text-[10px] font-mono text-cyan-300 mt-2">
+        <div className="relative w-full aspect-square max-w-[220px] mx-auto bg-slate-50 rounded-xl border border-blue-300 p-4 flex flex-col items-center justify-center scanline shadow-sm">
+          <Scan className={`w-12 h-12 text-blue-600 ${isScanning ? 'animate-ping' : 'animate-pulse'}`} />
+          <span className="text-[10px] font-mono text-blue-800 font-bold mt-2">
             {isScanning ? 'Decoding HMAC token...' : 'Align QR inside box'}
           </span>
         </div>
 
         {/* Available Active Class Sessions Quick List */}
         <div className="space-y-2 text-xs">
-          <label className="block text-slate-300 font-medium">Select Active Faculty Session</label>
+          <label className="block text-slate-700 font-semibold">Select Active Faculty Session</label>
           {sessions.map((sess) => (
             <div
               key={sess.id}
               onClick={() => handleScanSubmit(sess.qrCodeChallengeToken)}
-              className="bg-[#0B1020] border border-[#1E2D4A] hover:border-cyan-500 p-3 rounded-lg flex items-center justify-between cursor-pointer transition-all"
+              className="bg-slate-50 border border-slate-200 hover:border-blue-400 p-3 rounded-lg flex items-center justify-between cursor-pointer transition-all shadow-sm"
             >
               <div>
-                <span className="font-mono text-cyan-400 font-bold">{sess.subjectCode}</span>
-                <p className="text-white font-semibold">{sess.subjectName}</p>
-                <span className="text-[10px] text-slate-400">{sess.classroomName}</span>
+                <span className="font-mono text-blue-700 font-bold">{sess.subjectCode}</span>
+                <p className="text-slate-900 font-bold">{sess.subjectName}</p>
+                <span className="text-[10px] text-slate-500">{sess.classroomName}</span>
               </div>
-              <span className="text-[11px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded">
+              <span className="text-[11px] font-mono bg-green-100 text-green-800 border border-green-200 px-2 py-0.5 rounded font-bold">
                 SCAN & CHECKIN
               </span>
             </div>
@@ -93,13 +93,13 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
             value={manualToken}
             onChange={(e) => setManualToken(e.target.value)}
             placeholder="Enter token manually..."
-            className="flex-1 bg-[#0B1020] border border-[#1E2D4A] p-2.5 rounded-lg text-xs font-mono text-white outline-none"
+            className="flex-1 bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-xs font-mono text-slate-900 outline-none focus:border-blue-600"
           />
           <button
             onClick={() => handleScanSubmit(manualToken)}
-            className="px-4 py-2.5 rounded-lg bg-cyan-500 text-slate-950 font-bold text-xs"
+            className="px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm"
           >
-            Submit Token
+            Submit
           </button>
         </div>
       </div>

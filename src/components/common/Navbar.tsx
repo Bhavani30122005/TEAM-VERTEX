@@ -5,6 +5,7 @@ import {
   Bell, 
   User, 
   Lock, 
+  LogOut,
   Layers, 
   ChevronDown,
   Sparkles,
@@ -19,6 +20,7 @@ export const Navbar: React.FC = () => {
   const { 
     role, 
     setRole, 
+    logout,
     activeScreen, 
     setActiveScreen, 
     notificationsCount, 
@@ -28,65 +30,8 @@ export const Navbar: React.FC = () => {
     currentFaculty
   } = useAuth();
 
-  const handleRoleChange = (newRole: UserRole) => {
-    setRole(newRole);
-  };
-
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#0B1020]/95 backdrop-blur-md border-b border-[#1E2D4A]">
-      {/* Top Hackathon Demo Bar */}
-      <div className="bg-[#121A2B] border-b border-[#1E2D4A]/60 px-4 py-1.5 flex flex-wrap items-center justify-between text-xs">
-        <div className="flex items-center gap-2 text-slate-300 font-mono">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-          <span className="text-cyan-400 font-bold">VERITY Hackathon 2026 Live Demo Mode:</span>
-          <span className="hidden sm:inline text-slate-400">Switch user persona below</span>
-        </div>
-
-        {/* Instant Persona Switcher */}
-        <div className="flex items-center gap-1 font-mono">
-          <span className="text-slate-400 text-[11px] mr-1 hidden md:inline">Role Persona:</span>
-          <button
-            onClick={() => handleRoleChange('public')}
-            className={`px-2.5 py-0.5 rounded text-[11px] transition-all ${
-              role === 'public'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            Public Site
-          </button>
-          <button
-            onClick={() => handleRoleChange('student')}
-            className={`px-2.5 py-0.5 rounded text-[11px] transition-all ${
-              role === 'student'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-semibold'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            Student Mobile
-          </button>
-          <button
-            onClick={() => handleRoleChange('faculty')}
-            className={`px-2.5 py-0.5 rounded text-[11px] transition-all ${
-              role === 'faculty'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            Faculty Portal
-          </button>
-          <button
-            onClick={() => handleRoleChange('admin')}
-            className={`px-2.5 py-0.5 rounded text-[11px] transition-all ${
-              role === 'admin'
-                ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40 font-semibold'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            Admin Ops
-          </button>
-        </div>
-      </div>
+    <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
 
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
@@ -95,17 +40,15 @@ export const Navbar: React.FC = () => {
           onClick={() => setActiveScreen('landing')} 
           className="flex items-center gap-3 cursor-pointer group"
         >
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-teal-400 p-0.5 shadow-lg group-hover:shadow-cyan-500/25 transition-all">
-            <div className="w-full h-full bg-[#0B1020] rounded-[7px] flex items-center justify-center text-cyan-400">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
+          <div className="w-9 h-9 rounded-lg bg-blue-600 p-0.5 shadow-md shadow-blue-500/20 group-hover:bg-blue-700 transition-all flex items-center justify-center text-white">
+            <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-lg text-white tracking-wider font-mono">VERITY</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span className="font-extrabold text-lg text-slate-900 tracking-wider font-mono">VERITY</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
             </div>
-            <p className="text-[10px] text-slate-400 font-medium tracking-tight">Presence, Proven.</p>
+            <p className="text-[10px] text-slate-500 font-medium tracking-tight">Presence, Proven.</p>
           </div>
         </div>
 
@@ -118,7 +61,7 @@ export const Navbar: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search student, session, attempt ID..."
-              className="w-full bg-[#121A2B] border border-[#1E2D4A] focus:border-cyan-500 text-xs text-white placeholder-slate-500 pl-9 pr-3 py-2 rounded-lg outline-none transition-all"
+              className="w-full bg-slate-50 border border-slate-200 focus:border-blue-600 focus:bg-white text-xs text-slate-900 placeholder-slate-400 pl-9 pr-3 py-2 rounded-lg outline-none transition-all shadow-inner"
             />
           </div>
         )}
@@ -128,7 +71,7 @@ export const Navbar: React.FC = () => {
           <button
             onClick={() => setActiveScreen('landing')}
             className={`px-3 py-1.5 rounded-md transition-colors ${
-              activeScreen === 'landing' ? 'text-cyan-400 bg-cyan-500/10' : 'text-slate-300 hover:text-white'
+              activeScreen === 'landing' ? 'text-blue-600 bg-blue-50 font-semibold' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Overview
@@ -138,11 +81,11 @@ export const Navbar: React.FC = () => {
             onClick={() => setActiveScreen('verification-experience')}
             className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
               activeScreen === 'verification-experience' 
-                ? 'text-cyan-400 bg-cyan-500/10 font-semibold' 
-                : 'text-slate-300 hover:text-white'
+                ? 'text-blue-600 bg-blue-50 font-semibold' 
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Eye className="w-3.5 h-3.5 text-cyan-400" />
+            <Eye className="w-3.5 h-3.5 text-blue-600" />
             Live Verification Check
           </button>
 
@@ -150,11 +93,11 @@ export const Navbar: React.FC = () => {
             onClick={() => setActiveScreen('investigation-center')}
             className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
               activeScreen === 'investigation-center' 
-                ? 'text-amber-400 bg-amber-500/10 font-semibold' 
-                : 'text-slate-300 hover:text-white'
+                ? 'text-amber-700 bg-amber-50 font-semibold' 
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <AlertOctagon className="w-3.5 h-3.5 text-amber-400" />
+            <AlertOctagon className="w-3.5 h-3.5 text-amber-600" />
             Security Center
           </button>
 
@@ -162,11 +105,11 @@ export const Navbar: React.FC = () => {
             onClick={() => setActiveScreen('analytics')}
             className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
               activeScreen === 'analytics' 
-                ? 'text-teal-400 bg-teal-500/10 font-semibold' 
-                : 'text-slate-300 hover:text-white'
+                ? 'text-blue-700 bg-blue-50 font-semibold' 
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BarChart2 className="w-3.5 h-3.5 text-teal-400" />
+            <BarChart2 className="w-3.5 h-3.5 text-blue-600" />
             Analytics
           </button>
         </nav>
@@ -176,7 +119,7 @@ export const Navbar: React.FC = () => {
           {role === 'public' ? (
             <button
               onClick={() => setActiveScreen('auth')}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-xs font-semibold text-[#0B1020] shadow-md shadow-cyan-500/20 transition-all flex items-center gap-1.5"
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white shadow-md shadow-blue-500/20 transition-all flex items-center gap-1.5"
             >
               <Lock className="w-3.5 h-3.5" /> Platform Login
             </button>
@@ -185,33 +128,43 @@ export const Navbar: React.FC = () => {
               {/* Notification Bell */}
               <button 
                 onClick={() => setActiveScreen('investigation-center')}
-                className="relative p-2 rounded-lg bg-[#121A2B] border border-[#1E2D4A] text-slate-300 hover:text-white transition-colors"
+                className="relative p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 transition-colors"
                 title="Notifications & Alerts"
               >
                 <Bell className="w-4 h-4" />
                 {notificationsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-[10px] text-white font-mono font-bold flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-600 text-[10px] text-white font-mono font-bold flex items-center justify-center">
                     {notificationsCount}
                   </span>
                 )}
               </button>
 
               {/* User Profile Pill */}
-              <div className="flex items-center gap-2 pl-2 border-l border-[#1E2D4A]">
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                 <img
                   src={role === 'faculty' ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80' : currentStudent.avatarUrl}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full border border-cyan-500/40 object-cover"
+                  className="w-8 h-8 rounded-full border border-blue-300 object-cover"
                 />
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-semibold text-white leading-tight">
+                  <p className="text-xs font-semibold text-slate-900 leading-tight">
                     {role === 'faculty' ? currentFaculty.name : role === 'student' ? currentStudent.name : 'System Admin'}
                   </p>
-                  <p className="text-[10px] text-cyan-400 font-mono">
+                  <p className="text-[10px] text-blue-600 font-mono font-bold">
                     {role.toUpperCase()}
                   </p>
                 </div>
               </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={logout}
+                className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-red-50 hover:text-red-700 hover:border-red-200 border border-slate-200 text-slate-700 text-xs font-medium transition-all flex items-center gap-1.5 ml-1"
+                title="Log Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           )}
         </div>
