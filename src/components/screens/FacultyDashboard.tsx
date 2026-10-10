@@ -13,17 +13,22 @@ import {
   Sliders, 
   RefreshCw,
   Search,
-  ChevronRight
+  ChevronRight,
+  UserCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { mockSessions, mockStudents } from '../../data/mockData';
+import { db } from '../../services/db';
+import { ClassSession } from '../../types';
 
 export const FacultyDashboard: React.FC = () => {
   const { currentFaculty, setActiveScreen, setSelectedAttemptId } = useAuth();
-  const [activeSession, setActiveSession] = useState(mockSessions[0]);
+  const [sessions, setSessions] = useState<ClassSession[]>(db.getSessions());
+  const [activeSession, setActiveSession] = useState<ClassSession>(sessions[0]);
+  const [students] = useState(db.getStudents());
+  
   const [showSessionWizard, setShowSessionWizard] = useState(false);
   const [qrCountdown, setQrCountdown] = useState(14);
-  const [qrToken, setQrToken] = useState('VERITY-SESS-9938-X7K');
+  const [qrToken, setQrToken] = useState(activeSession?.qrCodeChallengeToken || 'VERITY-SESS-9938-X7K');
   const [filterState, setFilterState] = useState<'all' | 'present' | 'late' | 'review'>('all');
   const [studentSearch, setStudentSearch] = useState('');
 
@@ -32,14 +37,19 @@ export const FacultyDashboard: React.FC = () => {
   const [wizardGeofence, setWizardGeofence] = useState(25);
   const [wizardLateThreshold, setWizardLateThreshold] = useState(10);
 
+  // Sync DB sessions
+  useEffect(() => {
+    setSessions(db.getSessions());
+  }, []);
+
   // Dynamic QR Code Countdown simulator
   useEffect(() => {
     const timer = setInterval(() => {
       setQrCountdown((prev) => {
         if (prev <= 1) {
-          // Regenerate dynamic HMAC QR token
-          const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-          setQrToken(`VERITY-SESS-${Math.floor(1000 + Math.random() * 9000)}-${randomSuffix}`);
+          const randomSuffix = Math.random().toString(36).substring(2, 5).toUpperCase();
+          const newToken = `VERITY-SESS-${Math.floor(1000 + Math.random() * 9000)}-${randomSuffix}`;
+          setQrToken(newToken);
           return 15;
         }
         return prev - 1;
@@ -47,6 +57,23 @@ export const FacultyDashboard: React.FC = () => {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleExportCSV = () => {
+    db.exportSessionCSV(activeSession.id);
+  };
+
+  const handleLaunchSession = () => {
+    const newSess = db.createSession({
+      subjectCode: wizardSubject,
+      subjectName: wizardSubject === 'CS401' ? 'Advanced AI Security' : wizardSubject === 'CS408' ? 'Distributed Systems' : 'Network Threat Intelligence',
+      geofenceRadiusMeters: wizardGeofence,
+      lateThresholdMinutes: wizardLateThreshold
+    });
+    setSessions(db.getSessions());
+    setActiveSession(newSess);
+    setQrToken(newSess.qrCodeChallengeToken);
+    setShowSessionWizard(false);
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
@@ -73,11 +100,13 @@ export const FacultyDashboard: React.FC = () => {
           >
             <Plus className="w-4 h-4" /> Start New Verification Session
           </button>
+          
+          {/* REAL CSV REPORT EXPORTER BUTTON */}
           <button
-            onClick={() => alert('Exporting attendance ledger to CSV format...')}
-            className="px-3.5 py-2 rounded-xl bg-[#121A2B] hover:bg-[#19243C] text-slate-200 border border-[#1E2D4A] text-xs font-medium transition-all flex items-center gap-1.5"
+            onClick={handleExportCSV}
+            className="px-3.5 py-2 rounded-xl bg-[#121A2B] hover:bg-[#19243C] text-slate-200 border border-[#1E2D4A] hover:border-cyan-500 text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm"
           >
-            <Download className="w-4 h-4 text-cyan-400" /> Export Report
+            <Download className="w-4 h-4 text-cyan-400" /> Export CSV Report
           </button>
         </div>
       </div>
@@ -130,7 +159,7 @@ export const FacultyDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#1E2D4A]">
             <div>
               <h3 className="font-semibold text-white text-base">Real-Time Class Telemetry</h3>
-              <p className="text-xs text-slate-400">Live student check-ins for current active session</p>
+              <p className="text-xs text-slate-400">Live student check-ins for active session</p>
             </div>
             <div className="text-xs font-mono text-cyan-400 bg-[#0B1020] px-3 py-1.5 rounded border border-[#1E2D4A]">
               Session ID: {activeSession.id}
@@ -184,7 +213,7 @@ export const FacultyDashboard: React.FC = () => {
                   onClick={() => setFilterState('all')}
                   className={`px-2.5 py-1 rounded font-mono ${filterState === 'all' ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30' : 'text-slate-400'}`}
                 >
-                  All ({mockStudents.length})
+                  All ({students.length})
                 </button>
                 <button
                   onClick={() => setFilterState('present')}
@@ -214,7 +243,7 @@ export const FacultyDashboard: React.FC = () => {
 
             {/* Roster List */}
             <div className="space-y-2">
-              {mockStudents.map((std) => (
+              {students.map((std) => (
                 <div key={std.id} className="bg-[#0B1020] border border-[#1E2D4A] p-3 rounded-lg flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3">
                     <img src={std.avatarUrl} alt={std.name} className="w-8 h-8 rounded-full border border-cyan-500/30 object-cover" />
@@ -222,6 +251,11 @@ export const FacultyDashboard: React.FC = () => {
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-white">{std.name}</span>
                         <span className="font-mono text-cyan-400 text-[11px]">{std.rollNumber}</span>
+                        {std.enrolledFaceTemplate && (
+                          <span className="text-[10px] text-teal-400 bg-teal-500/10 px-1.5 py-0.2 rounded border border-teal-500/20">
+                            FACE ENROLLED
+                          </span>
+                        )}
                       </div>
                       <span className="text-[11px] text-slate-400">{std.registeredDevice}</span>
                     </div>
@@ -329,10 +363,7 @@ export const FacultyDashboard: React.FC = () => {
             <div className="flex justify-end gap-3 pt-3 border-t border-[#1E2D4A]">
               <button onClick={() => setShowSessionWizard(false)} className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs">Cancel</button>
               <button
-                onClick={() => {
-                  setShowSessionWizard(false);
-                  alert(`Session launched for ${wizardSubject} with ${wizardGeofence}m geofence!`);
-                }}
+                onClick={handleLaunchSession}
                 className="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-teal-500 text-black font-bold text-xs shadow-md"
               >
                 Launch Active QR Session
